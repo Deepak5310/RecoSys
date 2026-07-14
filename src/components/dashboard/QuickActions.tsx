@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { UploadCloud, UserPlus, MessageCircle, DollarSign, FileText } from 'lucide-react';
 import * as xlsx from 'xlsx';
 import './Dashboard.css';
@@ -12,20 +12,20 @@ const actions = [
 ];
 
 import { useData } from '../../context/DataContext';
+import { QuickRecoveryModal } from './QuickRecoveryModal';
 
 export function QuickActions() {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isRecoveryModalOpen, setIsRecoveryModalOpen] = useState(false);
   const { setRawData } = useData();
 
   const handleActionClick = (id: string) => {
-    console.log(`Button clicked with id: ${id}`);
     if (id === 'import') {
       if (fileInputRef.current) {
-        console.log('Triggering file input click...');
         fileInputRef.current.click();
-      } else {
-        console.error('File input ref is null!');
       }
+    } else if (id === 'recovery') {
+      setIsRecoveryModalOpen(true);
     } else {
       console.log(`Action clicked: ${id}`);
     }
@@ -90,6 +90,10 @@ export function QuickActions() {
           );
         })}
       </div>
+
+      {isRecoveryModalOpen && (
+        <QuickRecoveryModal onClose={() => setIsRecoveryModalOpen(false)} />
+      )}
     </>
   );
 }
