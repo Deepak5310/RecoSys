@@ -210,7 +210,8 @@ tr:hover {
 /* Layout Classes */
 .layout-wrapper {
   display: flex;
-  min-height: 100vh;
+  height: 100vh;
+  overflow: hidden;
 }
 
 .sidebar {
@@ -219,6 +220,7 @@ tr:hover {
   border-right: 1px solid var(--border);
   display: flex;
   flex-direction: column;
+  overflow-y: auto;
 }
 
 .main-wrapper {

@@ -16,6 +16,7 @@ export interface DashboardData {
 interface DataContextProps {
   rawData: any[];
   setRawData: (data: any[]) => void;
+  updateCase: (proposalNo: string, updatedData: any) => void;
   metrics: DashboardData;
 }
 
@@ -35,6 +36,7 @@ const defaultMetrics: DashboardData = {
 export const DataContext = createContext<DataContextProps>({
   rawData: [],
   setRawData: () => {},
+  updateCase: () => {},
   metrics: defaultMetrics
 });
 
@@ -150,8 +152,14 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
     };
   }, [rawData]);
 
+  const updateCase = (proposalNo: string, updatedData: any) => {
+    setRawData(prev => prev.map(row => 
+      row['Proposal No'] === proposalNo ? { ...row, ...updatedData } : row
+    ));
+  };
+
   return (
-    <DataContext.Provider value={{ rawData, setRawData, metrics }}>
+    <DataContext.Provider value={{ rawData, setRawData, updateCase, metrics }}>
       {children}
     </DataContext.Provider>
   );
