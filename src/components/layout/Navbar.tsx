@@ -6,8 +6,8 @@ export function Navbar() {
   return (
     <header className="navbar">
       <div className="navbar-left flex items-center gap-2">
-        <div className="logo-icon">LR</div>
-        <h1 className="logo-text">RecoverOS</h1>
+        <div className="logo-icon">ME</div>
+        <h1 className="logo-text">Mahadev Enterprises</h1>
       </div>
       
       <div className="navbar-center flex items-center">
@@ -28,10 +28,10 @@ export function Navbar() {
         </button>
         <div className="user-profile flex items-center gap-2 cursor-pointer">
           <div className="avatar bg-primary flex items-center justify-center rounded-full text-sm">
-            JD
+            DK
           </div>
           <div className="user-details">
-            <div className="user-name text-sm fw-600">John Doe</div>
+            <div className="user-name text-sm fw-600">Deepak</div>
             <div className="user-role text-xs text-muted">Super Admin</div>
           </div>
         </div>
