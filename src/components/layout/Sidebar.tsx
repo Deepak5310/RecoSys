@@ -1,14 +1,15 @@
 import React, { useRef } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { LayoutDashboard, FileSpreadsheet, Briefcase, Users, UserPlus } from 'lucide-react';
 import * as xlsx from 'xlsx';
 import './Sidebar.css';
 
 const navItems = [
-  { id: 'dashboard', icon: LayoutDashboard, label: 'Dashboard', active: true },
+  { id: 'dashboard', icon: LayoutDashboard, label: 'Dashboard', path: '/' },
   { id: 'import', icon: FileSpreadsheet, label: 'Import Excel' },
-  { id: 'cases', icon: Briefcase, label: 'Cases' },
+  { id: 'cases', icon: Briefcase, label: 'Cases', path: '/cases' },
   { id: 'allocation', icon: UserPlus, label: 'Allocation' },
-  { id: 'agents', icon: Users, label: 'Agents' },
+  { id: 'agents', icon: Users, label: 'Agents', path: '/agents' },
 ];
 
 import { useData } from '../../context/DataContext';
@@ -16,16 +17,16 @@ import { useData } from '../../context/DataContext';
 export function Sidebar() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { setRawData, metrics } = useData();
+  const navigate = useNavigate();
+  const location = useLocation();
 
-  const handleNavClick = (id: string) => {
-    console.log(`Sidebar clicked with id: ${id}`);
+  const handleNavClick = (id: string, path?: string) => {
     if (id === 'import') {
       if (fileInputRef.current) {
-        console.log('Triggering file input from Sidebar...');
         fileInputRef.current.click();
-      } else {
-        console.error('File input ref is null in Sidebar!');
       }
+    } else if (path) {
+      navigate(path);
     }
   };
 
@@ -70,11 +71,12 @@ export function Sidebar() {
           <ul className="nav-list">
             {navItems.map((item, index) => {
               const Icon = item.icon;
+              const isActive = item.path === location.pathname;
               return (
                 <li 
                   key={index} 
-                  className={`nav-item ${item.active ? 'active' : ''}`}
-                  onClick={() => handleNavClick(item.id)}
+                  className={`nav-item ${isActive ? 'active' : ''}`}
+                  onClick={() => handleNavClick(item.id, item.path)}
                 >
                   <Icon size={18} className="nav-icon" />
                   <span className="nav-label">{item.label}</span>
