@@ -11,8 +11,11 @@ const navItems = [
   { id: 'agents', icon: Users, label: 'Agents' },
 ];
 
+import { useData } from '../../context/DataContext';
+
 export function Sidebar() {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { setRawData, metrics } = useData();
 
   const handleNavClick = (id: string) => {
     console.log(`Sidebar clicked with id: ${id}`);
@@ -38,6 +41,8 @@ export function Sidebar() {
         const sheetName = workbook.SheetNames[0];
         const worksheet = workbook.Sheets[sheetName];
         const jsonData = xlsx.utils.sheet_to_json(worksheet);
+        
+        setRawData(jsonData);
         
         console.log('Imported Excel Data from Sidebar:', jsonData);
         alert(`Successfully imported ${jsonData.length} cases from ${file.name}`);
@@ -85,23 +90,23 @@ export function Sidebar() {
             <ul className="summary-list">
               <li>
                 <span className="summary-label">New Cases</span>
-                <span className="summary-val text-info">142</span>
+                <span className="summary-val text-info">{metrics.newToday}</span>
               </li>
               <li>
                 <span className="summary-label">Allocated</span>
-                <span className="summary-val">120</span>
+                <span className="summary-val">{metrics.totalCases}</span>
               </li>
               <li>
                 <span className="summary-label">Recovered</span>
-                <span className="summary-val text-success">₹ 4.2L</span>
+                <span className="summary-val text-success">₹ {(metrics.recoveredAmount / 100000).toFixed(2)}L</span>
               </li>
               <li>
                 <span className="summary-label">PTP</span>
-                <span className="summary-val text-warning">45</span>
+                <span className="summary-val text-warning">{metrics.ptpCases}</span>
               </li>
               <li>
-                <span className="summary-label">Payments</span>
-                <span className="summary-val">18</span>
+                <span className="summary-label">Pending</span>
+                <span className="summary-val">{metrics.pendingCases}</span>
               </li>
             </ul>
           </div>

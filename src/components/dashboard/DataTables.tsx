@@ -1,24 +1,12 @@
-
+import { useData } from '../../context/DataContext';
 import './Dashboard.css';
 
-const allocations = [
-  { id: 1, date: '14 Jul 2026', agent: 'Alice Smith', cases: 45, due: '₹ 12.5L', status: 'Allocated' },
-  { id: 2, date: '14 Jul 2026', agent: 'Bob Johnson', cases: 30, due: '₹ 8.2L', status: 'Pending' },
-  { id: 3, date: '13 Jul 2026', agent: 'Charlie Davis', cases: 50, due: '₹ 15.0L', status: 'Allocated' },
-  { id: 4, date: '13 Jul 2026', agent: 'Diana Prince', cases: 25, due: '₹ 6.4L', status: 'Pending' },
-];
-
-const recoveries = [
-  { id: 'REC-1042', date: '14 Jul 2026', agent: 'Alice Smith', amount: '₹ 45,000', mode: 'UPI' },
-  { id: 'REC-1043', date: '14 Jul 2026', agent: 'Charlie Davis', amount: '₹ 12,500', mode: 'Cash' },
-  { id: 'REC-1044', date: '14 Jul 2026', agent: 'Bob Johnson', amount: '₹ 50,000', mode: 'Bank Transfer' },
-  { id: 'REC-1045', date: '13 Jul 2026', agent: 'Alice Smith', amount: '₹ 25,000', mode: 'UPI' },
-];
-
 export function DataTables() {
+  const { metrics } = useData();
+
   const getStatusBadge = (status: string) => {
     switch(status) {
-      case 'Allocated': return <span className="badge badge-success">{status}</span>;
+      case 'Closed': return <span className="badge badge-success">{status}</span>;
       case 'Pending': return <span className="badge badge-warning">{status}</span>;
       default: return <span className="badge">{status}</span>;
     }
@@ -49,15 +37,19 @@ export function DataTables() {
               </tr>
             </thead>
             <tbody>
-              {allocations.map(row => (
-                <tr key={row.id}>
-                  <td>{row.date}</td>
-                  <td>{row.agent}</td>
-                  <td>{row.cases}</td>
-                  <td className="font-semibold">{row.due}</td>
-                  <td>{getStatusBadge(row.status)}</td>
-                </tr>
-              ))}
+              {metrics.allocations.length === 0 ? (
+                <tr><td colSpan={5} className="text-center text-muted">No data available</td></tr>
+              ) : (
+                metrics.allocations.map(row => (
+                  <tr key={row.id}>
+                    <td>{row.date}</td>
+                    <td>{row.agent}</td>
+                    <td>{row.cases}</td>
+                    <td className="font-semibold">{row.due}</td>
+                    <td>{getStatusBadge(row.status)}</td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
@@ -80,15 +72,19 @@ export function DataTables() {
               </tr>
             </thead>
             <tbody>
-              {recoveries.map(row => (
-                <tr key={row.id}>
-                  <td>{row.date}</td>
-                  <td>{row.agent}</td>
-                  <td className="text-muted">{row.id}</td>
-                  <td className="font-semibold text-success">{row.amount}</td>
-                  <td>{getModeBadge(row.mode)}</td>
-                </tr>
-              ))}
+              {metrics.recoveries.length === 0 ? (
+                <tr><td colSpan={5} className="text-center text-muted">No data available</td></tr>
+              ) : (
+                metrics.recoveries.map(row => (
+                  <tr key={row.id}>
+                    <td>{row.date}</td>
+                    <td>{row.agent}</td>
+                    <td className="text-muted">{row.id}</td>
+                    <td className="font-semibold text-success">{row.amount}</td>
+                    <td>{getModeBadge(row.mode)}</td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>

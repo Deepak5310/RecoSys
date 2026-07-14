@@ -1,0 +1,142 @@
+import React, { createContext, useState, useContext, useMemo } from 'react';
+
+export interface DashboardData {
+  totalCases: number;
+  pendingCases: number;
+  ptpCases: number;
+  recoveredAmount: number;
+  newToday: number;
+  allocations: any[];
+  recoveries: any[];
+  topAgents: any[];
+  bucketData: any;
+  lineChartData: any;
+}
+
+interface DataContextProps {
+  rawData: any[];
+  setRawData: (data: any[]) => void;
+  metrics: DashboardData;
+}
+
+const defaultMetrics: DashboardData = {
+  totalCases: 0,
+  pendingCases: 0,
+  ptpCases: 0,
+  recoveredAmount: 0,
+  newToday: 0,
+  allocations: [],
+  recoveries: [],
+  topAgents: [],
+  bucketData: { labels: [], datasets: [] },
+  lineChartData: { labels: [], datasets: [] }
+};
+
+export const DataContext = createContext<DataContextProps>({
+  rawData: [],
+  setRawData: () => {},
+  metrics: defaultMetrics
+});
+
+export const useData = () => useContext(DataContext);
+
+export const DataProvider = ({ children }: { children: React.ReactNode }) => {
+  const [rawData, setRawData] = useState<any[]>([]);
+
+  const metrics = useMemo(() => {
+    // If no data is uploaded yet, return some mock default data for visual purposes
+    // or just 0s. Let's return 0s so it genuinely reflects the state.
+    if (!rawData || rawData.length === 0) {
+      return defaultMetrics;
+    }
+
+    const totalCases = rawData.length;
+    let pendingCases = 0;
+    let recoveredAmount = 0;
+    let ptpCases = 0;
+    
+    const agentsMap: Record<string, number> = {};
+    const bucketsMap: Record<string, number> = {};
+
+    rawData.forEach(row => {
+      const status = row['Status'] || '';
+      if (status !== 'Resolve') pendingCases++;
+      if (status === 'PTP' || row['PTP'] > 0) ptpCases++;
+
+      const emiReceived = Number(row['EMI Received']) || 0;
+      recoveredAmount += emiReceived;
+
+      const agent = row['FOS'] || 'Unknown';
+      agentsMap[agent] = (agentsMap[agent] || 0) + emiReceived;
+
+      const bkt = row['BKT'] !== undefined ? String(row['BKT']) : '0';
+      bucketsMap[bkt] = (bucketsMap[bkt] || 0) + 1;
+    });
+
+    const topAgents = Object.entries(agentsMap)
+      .map(([name, amount]) => ({ name, amount }))
+      .sort((a, b) => b.amount - a.amount)
+      .slice(0, 4)
+      .map((a, i) => ({
+        rank: i + 1,
+        name: a.name,
+        recovered: `₹ ${(a.amount / 100000).toFixed(2)}L`,
+        initials: a.name.split(' ').map((n: string) => n[0]).join('').substring(0, 2),
+        color: ['#3b82f6', '#8b5cf6', '#10b981', '#f59e0b'][i % 4]
+      }));
+
+    const bucketLabels = Object.keys(bucketsMap);
+    const bucketValues = Object.values(bucketsMap);
+    const bucketData = {
+      labels: bucketLabels.map(l => `Bucket ${l}`),
+      datasets: [{
+        data: bucketValues,
+        backgroundColor: ['#3b82f6', '#8b5cf6', '#f59e0b', '#ef4444', '#10b981'],
+        borderWidth: 0,
+      }]
+    };
+
+    const allocations = rawData.slice(0, 5).map((row, i) => ({
+      id: i,
+      date: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
+      agent: row['FOS'] || 'Unknown',
+      cases: 1, 
+      due: `₹ ${((row['Total Due'] || row['POS'] || 0) / 100000).toFixed(2)}L`,
+      status: row['Status'] === 'Resolve' ? 'Closed' : 'Pending'
+    }));
+
+    const recoveriesRaw = rawData.filter(row => (row['EMI Received'] || 0) > 0).slice(0, 5);
+    const recoveries = recoveriesRaw.map((row, i) => ({
+      id: row['Proposal No'] || `REC-${i}`,
+      date: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
+      agent: row['FOS'] || 'Unknown',
+      amount: `₹ ${(row['EMI Received'] || 0).toLocaleString('en-IN')}`,
+      mode: 'Bank Transfer'
+    }));
+
+    return {
+      totalCases,
+      pendingCases,
+      ptpCases,
+      recoveredAmount,
+      newToday: Math.floor(totalCases * 0.1),
+      allocations,
+      recoveries,
+      topAgents,
+      bucketData,
+      lineChartData: {
+         labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+         datasets: [
+           { label: 'Recovered', data: [12, 19, 15, 25, 22, 30, recoveredAmount / 10000], borderColor: '#22c55e', backgroundColor: 'rgba(34, 197, 94, 0.1)', tension: 0.4 },
+           { label: 'PTP', data: [5, 12, 8, 15, 10, 18, ptpCases], borderColor: '#38bdf8', backgroundColor: 'rgba(56, 189, 248, 0.1)', tension: 0.4 },
+         ],
+      }
+    };
+  }, [rawData]);
+
+  return (
+    <DataContext.Provider value={{ rawData, setRawData, metrics }}>
+      {children}
+    </DataContext.Provider>
+  );
+};

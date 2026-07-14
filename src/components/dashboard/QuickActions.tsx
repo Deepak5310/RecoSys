@@ -11,8 +11,11 @@ const actions = [
   { id: 'reports', title: 'Reports', sub: 'Generate insights', icon: FileText, color: '#ef4444' },
 ];
 
+import { useData } from '../../context/DataContext';
+
 export function QuickActions() {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { setRawData } = useData();
 
   const handleActionClick = (id: string) => {
     console.log(`Button clicked with id: ${id}`);
@@ -40,6 +43,8 @@ export function QuickActions() {
         const sheetName = workbook.SheetNames[0];
         const worksheet = workbook.Sheets[sheetName];
         const jsonData = xlsx.utils.sheet_to_json(worksheet);
+        
+        setRawData(jsonData);
         
         console.log('Imported Excel Data:', jsonData);
         alert(`Successfully imported ${jsonData.length} cases from ${file.name}`);

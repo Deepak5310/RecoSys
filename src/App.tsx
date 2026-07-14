@@ -5,14 +5,18 @@ import { Analytics } from './components/dashboard/Analytics';
 import { DataTables } from './components/dashboard/DataTables';
 import { QuickActions } from './components/dashboard/QuickActions';
 
+import { DataProvider } from './context/DataContext';
+
 function App() {
   return (
-    <Layout>
-      <StatCards />
-      <Analytics />
-      <DataTables />
-      <QuickActions />
-    </Layout>
+    <DataProvider>
+      <Layout>
+        <StatCards />
+        <Analytics />
+        <DataTables />
+        <QuickActions />
+      </Layout>
+    </DataProvider>
   );
 }
 
