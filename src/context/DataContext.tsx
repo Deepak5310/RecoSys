@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext, useMemo } from 'react';
+import React, { createContext, useState, useEffect, useContext, useMemo } from 'react';
 
 export interface DashboardData {
   totalCases: number;
@@ -41,7 +41,23 @@ export const DataContext = createContext<DataContextProps>({
 export const useData = () => useContext(DataContext);
 
 export const DataProvider = ({ children }: { children: React.ReactNode }) => {
-  const [rawData, setRawData] = useState<any[]>([]);
+  const [rawData, setRawData] = useState<any[]>(() => {
+    try {
+      const saved = localStorage.getItem('recovery_app_data');
+      if (saved) return JSON.parse(saved);
+    } catch (e) {
+      console.error('Failed to parse local storage data:', e);
+    }
+    return [];
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('recovery_app_data', JSON.stringify(rawData));
+    } catch (e) {
+      console.error('Failed to save to local storage:', e);
+    }
+  }, [rawData]);
 
   const metrics = useMemo(() => {
     // If no data is uploaded yet, return some mock default data for visual purposes
