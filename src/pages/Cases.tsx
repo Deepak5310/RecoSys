@@ -1,18 +1,13 @@
-import { useMemo } from 'react';
+import { useState } from 'react';
 import { useData } from '../context/DataContext';
+import { CaseDetailsModal } from '../components/dashboard/CaseDetailsModal';
 
 export function Cases() {
   const { rawData } = useData();
-
-  // Extract all unique columns from the data
-  const columns = useMemo(() => {
-    if (rawData.length === 0) return [];
-    // Get all keys from the first object
-    return Object.keys(rawData[0]);
-  }, [rawData]);
+  const [selectedCase, setSelectedCase] = useState<any>(null);
 
   return (
-    <div className="cases-page">
+    <div className="cases-page relative">
       <div className="glass-panel" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', height: 'calc(100vh - 100px)' }}>
         <h2 className="card-title" style={{ marginBottom: '1.5rem' }}>All Cases Directory</h2>
         
@@ -23,30 +18,36 @@ export function Cases() {
             <table style={{ whiteSpace: 'nowrap' }}>
               <thead style={{ position: 'sticky', top: 0, background: 'var(--bg-panel-solid)', zIndex: 1 }}>
                 <tr>
-                  {columns.map((col) => (
-                    <th key={col}>{col}</th>
-                  ))}
+                  <th>Proposal No</th>
+                  <th>Customer Name</th>
+                  <th>Mobile</th>
+                  <th>Total Due</th>
+                  <th>Status</th>
+                  <th>Agent (FOS)</th>
+                  <th style={{ textAlign: 'right' }}>Action</th>
                 </tr>
               </thead>
               <tbody>
                 {rawData.map((row, idx) => (
                   <tr key={row['Proposal No'] || idx}>
-                    {columns.map((col) => {
-                      let val = row[col];
-                      
-                      // Format Excel Date serial numbers (roughly > 40000)
-                      if (typeof val === 'number' && val > 40000 && (col.toLowerCase().includes('date'))) {
-                        // Excel dates are days since Dec 30 1899
-                        const date = new Date((val - (25567 + 2)) * 86400 * 1000);
-                        if (!isNaN(date.getTime())) {
-                          val = date.toLocaleDateString();
-                        }
-                      }
-                      
-                      return (
-                        <td key={col}>{val !== undefined && val !== null ? String(val) : '-'}</td>
-                      );
-                    })}
+                    <td className="text-muted">{row['Proposal No']}</td>
+                    <td className="font-semibold">{row['Customer Name'] || '-'}</td>
+                    <td>{row['Residence Phone'] || row['Reference Mobile'] || '-'}</td>
+                    <td>₹ {(row['Total Due'] || row['POS'] || 0).toLocaleString('en-IN')}</td>
+                    <td>
+                      <span className={`badge ${row['Status'] === 'Resolve' ? 'badge-success' : 'badge-warning'}`}>
+                        {row['Status'] || 'Pending'}
+                      </span>
+                    </td>
+                    <td>{row['FOS'] || '-'}</td>
+                    <td style={{ textAlign: 'right' }}>
+                      <button 
+                        className="btn btn-ghost btn-sm text-primary"
+                        onClick={() => setSelectedCase(row)}
+                      >
+                        View
+                      </button>
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -54,6 +55,13 @@ export function Cases() {
           </div>
         )}
       </div>
+
+      {selectedCase && (
+        <CaseDetailsModal 
+          caseData={selectedCase} 
+          onClose={() => setSelectedCase(null)} 
+        />
+      )}
     </div>
   );
 }

@@ -100,7 +100,7 @@ export function Sidebar() {
               </li>
               <li>
                 <span className="summary-label">Recovered</span>
-                <span className="summary-val text-success">₹ {(metrics.recoveredAmount / 100000).toFixed(2)}L</span>
+                <span className="summary-val text-success">₹ {metrics.recoveredAmount.toLocaleString('en-IN')}</span>
               </li>
               <li>
                 <span className="summary-label">PTP</span>

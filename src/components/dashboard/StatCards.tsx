@@ -9,7 +9,7 @@ export function StatCards() {
     { title: 'Total Cases', value: metrics.totalCases.toLocaleString('en-IN'), sub: 'Total uploaded cases', icon: Briefcase, color: 'var(--primary)' },
     { title: 'Pending', value: metrics.pendingCases.toLocaleString('en-IN'), sub: 'Requires action', icon: Clock, color: 'var(--status-warning-text)' },
     { title: 'PTP', value: metrics.ptpCases.toLocaleString('en-IN'), sub: 'Promises to pay', icon: FileWarning, color: 'var(--status-info-text)' },
-    { title: 'Recovered', value: `₹ ${(metrics.recoveredAmount / 100000).toFixed(2)}L`, sub: 'Total EMI Received', icon: CheckCircle, color: 'var(--status-success-text)' },
+    { title: 'Recovered', value: `₹ ${metrics.recoveredAmount.toLocaleString('en-IN')}`, sub: 'Total Amount Collected', icon: CheckCircle, color: 'var(--status-success-text)' },
     { title: 'New Today', value: metrics.newToday.toLocaleString('en-IN'), sub: 'Assigned today', icon: FilePlus, color: 'var(--secondary)' },
   ];
 
