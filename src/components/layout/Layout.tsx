@@ -1,7 +1,6 @@
 
 import { Navbar } from './Navbar';
 import { Sidebar } from './Sidebar';
-import { Footer } from './Footer';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -16,7 +15,6 @@ export function Layout({ children }: LayoutProps) {
         <main className="main-content">
           {children}
         </main>
-        <Footer />
       </div>
     </div>
   );
