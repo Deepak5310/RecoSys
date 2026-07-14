@@ -1,18 +1,39 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useData } from '../context/DataContext';
 import { CaseDetailsModal } from '../components/dashboard/CaseDetailsModal';
 
 export function Cases() {
-  const { rawData } = useData();
+  const { rawData, searchQuery } = useData();
   const [selectedCase, setSelectedCase] = useState<any>(null);
+
+  const filteredData = useMemo(() => {
+    if (!searchQuery) return rawData;
+    
+    const query = searchQuery.toLowerCase();
+    return rawData.filter(row => {
+      const name = String(row['Customer Name'] || '').toLowerCase();
+      const proposal = String(row['Proposal No'] || '').toLowerCase();
+      const mobile1 = String(row['Residence Phone'] || '').toLowerCase();
+      const mobile2 = String(row['Reference Mobile'] || '').toLowerCase();
+      
+      return name.includes(query) || proposal.includes(query) || mobile1.includes(query) || mobile2.includes(query);
+    });
+  }, [rawData, searchQuery]);
 
   return (
     <div className="cases-page relative">
       <div className="glass-panel" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', height: 'calc(100vh - 100px)' }}>
-        <h2 className="card-title" style={{ marginBottom: '1.5rem' }}>All Cases Directory</h2>
+        <div className="flex items-center justify-between" style={{ marginBottom: '1.5rem' }}>
+          <h2 className="card-title m-0">All Cases Directory</h2>
+          {searchQuery && (
+            <div className="badge badge-primary">Found {filteredData.length} results for "{searchQuery}"</div>
+          )}
+        </div>
         
         {rawData.length === 0 ? (
           <div className="text-center text-muted py-4">No data imported yet. Please go to the Dashboard and import the Excel file.</div>
+        ) : filteredData.length === 0 ? (
+          <div className="text-center text-muted py-4">No cases match your search query.</div>
         ) : (
           <div className="table-container" style={{ flex: 1, overflow: 'auto' }}>
             <table style={{ whiteSpace: 'nowrap' }}>
@@ -28,7 +49,7 @@ export function Cases() {
                 </tr>
               </thead>
               <tbody>
-                {rawData.map((row, idx) => (
+                {filteredData.map((row, idx) => (
                   <tr key={row['Proposal No'] || idx}>
                     <td className="text-muted">{row['Proposal No']}</td>
                     <td className="font-semibold">{row['Customer Name'] || '-'}</td>

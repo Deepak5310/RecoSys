@@ -1,8 +1,19 @@
-
 import { Search, Bell } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { useData } from '../../context/DataContext';
 import './Navbar.css';
 
 export function Navbar() {
+  const { searchQuery, setSearchQuery } = useData();
+  const navigate = useNavigate();
+
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+    if (e.target.value && window.location.pathname !== '/cases') {
+      navigate('/cases');
+    }
+  };
+
   return (
     <header className="navbar">
       <div className="navbar-left flex items-center gap-2">
@@ -17,6 +28,8 @@ export function Navbar() {
             type="text" 
             placeholder="Search Customer, Proposal No, Mobile..." 
             className="search-input"
+            value={searchQuery}
+            onChange={handleSearch}
           />
         </div>
       </div>

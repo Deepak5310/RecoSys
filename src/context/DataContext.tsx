@@ -17,6 +17,8 @@ interface DataContextProps {
   rawData: any[];
   setRawData: (data: any[]) => void;
   updateCase: (proposalNo: string, updatedData: any) => void;
+  searchQuery: string;
+  setSearchQuery: (query: string) => void;
   metrics: DashboardData;
 }
 
@@ -37,12 +39,15 @@ export const DataContext = createContext<DataContextProps>({
   rawData: [],
   setRawData: () => {},
   updateCase: () => {},
+  searchQuery: '',
+  setSearchQuery: () => {},
   metrics: defaultMetrics
 });
 
 export const useData = () => useContext(DataContext);
 
 export const DataProvider = ({ children }: { children: React.ReactNode }) => {
+  const [searchQuery, setSearchQuery] = useState('');
   const [rawData, setRawData] = useState<any[]>(() => {
     try {
       const saved = localStorage.getItem('recovery_app_data');
@@ -159,7 +164,7 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   return (
-    <DataContext.Provider value={{ rawData, setRawData, updateCase, metrics }}>
+    <DataContext.Provider value={{ rawData, setRawData, updateCase, searchQuery, setSearchQuery, metrics }}>
       {children}
     </DataContext.Provider>
   );
